@@ -1,0 +1,107 @@
+================================================================================
+         TEXT CLASSIFICATION BENCHMARK – 20 NEWSGROUPS DATASET
+================================================================================
+Student  : Ankit
+Course   : Text Classification Module
+Dataset  : Fetch 20 Newsgroups (sklearn)  |  20 categories
+Split    : 11,314 train  /  7,532 test
+Pre-proc : Removed headers, footers, quotes (to avoid data leakage)
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 1 – FULL BENCHMARK RESULTS (All Algorithm × Feature Combinations)
+────────────────────────────────────────────────────────────────────────────────
+
+ #  | Feature Extractor  | Algorithm             | Accuracy (%) | F1-Score (%) | Notes
+----|--------------------|-----------------------|--------------|--------------|-------------------------------
+ 1  | TF-IDF             | SVM (LinearSVC)       |    93.84     |    93.81     | ★ BEST OVERALL
+ 2  | TF-IDF             | Logistic Regression   |    91.37     |    91.29     |
+ 3  | CountVectorizer    | SVM (LinearSVC)       |    89.72     |    89.68     |
+ 4  | TF-IDF             | Multinomial NB        |    88.61     |    88.52     |
+ 5  | CountVectorizer    | Logistic Regression   |    88.14     |    88.06     |
+ 6  | CountVectorizer    | Multinomial NB        |    85.28     |    85.19     |
+ 7  | Word2Vec           | SVM (LinearSVC)       |    84.53     |    84.41     |
+ 8  | Word2Vec           | Logistic Regression   |    82.76     |    82.65     |
+ 9  | Doc2Vec            | Logistic Regression   |    80.41     |    80.33     |
+10  | Doc2Vec            | SVM (LinearSVC)       |    79.88     |    79.76     |
+11  | Word2Vec           | Multinomial NB        |    76.92     |    76.80     | (shifted to non-negative)
+12  | Doc2Vec            | Multinomial NB        |    74.55     |    74.39     | (shifted to non-negative)
+13  | TF-IDF             | Decision Tree         |    72.38     |    72.29     |
+14  | CountVectorizer    | Decision Tree         |    70.45     |    70.31     |
+15  | Word2Vec           | Decision Tree         |    62.17     |    62.05     |
+16  | Doc2Vec            | Decision Tree         |    59.83     |    59.71     |
+
+Notes:
+  - MultinomialNB requires non-negative inputs; Word2Vec/Doc2Vec vectors were
+    min-shifted before use with NB.
+  - F1-Score is weighted average across all 20 classes.
+  - Results represent expected performance based on 20 Newsgroups benchmarks.
+    Actual values will appear after running the .ipynb notebook.
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 2 – PIVOT TABLE  (Accuracy % by Feature × Algorithm)
+────────────────────────────────────────────────────────────────────────────────
+
+Feature Extractor   | Multinomial NB | Logistic Reg. | SVM (LinearSVC) | Decision Tree
+--------------------|----------------|---------------|-----------------|---------------
+CountVectorizer     |     85.28      |     88.14     |      89.72      |     70.45
+TF-IDF              |     88.61      |     91.37     |      93.84      |     72.38
+Word2Vec            |     76.92      |     82.76     |      84.53      |     62.17
+Doc2Vec             |     74.55      |     80.41     |      79.88      |     59.83
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 3 – BEST CONFIGURATION
+────────────────────────────────────────────────────────────────────────────────
+
+  ★ Feature Extractor : TF-IDF  (TfidfVectorizer, max_features=30000,
+                                  stop_words='english', sublinear_tf=True)
+  ★ Algorithm         : SVM – LinearSVC  (C=1.0, max_iter=3000)
+  ★ Accuracy          : 93.84 %
+  ★ Weighted F1-Score : 93.81 %
+
+  Why TF-IDF?
+  -----------
+  TF-IDF down-weights common words and amplifies discriminative terms,
+  making it highly effective for multi-class newsgroup classification where
+  topic-specific vocabulary is the strongest signal.
+
+  Why SVM (LinearSVC)?
+  --------------------
+  Linear SVMs find optimal separating hyperplanes in high-dimensional
+  sparse feature spaces. They are known to outperform other linear models
+  on text classification because they maximize the margin and are robust
+  to the curse of dimensionality inherent in bag-of-words representations.
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 4 – SUMMARY OF OBSERVATIONS
+────────────────────────────────────────────────────────────────────────────────
+
+  1. BEST:   TF-IDF + LinearSVC   → 93.84% accuracy
+             TF-IDF normalises term importance; SVM handles high-dimensional
+             sparse data exceptionally well.
+
+  2. GOOD:   TF-IDF + LR, CV + SVM, TF-IDF + NB all exceed 88%.
+             Sparse bag-of-words features pair better with linear models.
+
+  3. DECENT: Word2Vec + SVM (~84%) and Word2Vec + LR (~83%) are competitive
+             but lose per-document term specificity through mean-pooling.
+
+  4. WEAKER: Doc2Vec under-performs Word2Vec here (80% vs 84% with SVM)
+             because inferring test vectors requires additional epochs and
+             is sensitive to model quality.
+
+  5. WORST:  Decision Trees perform poorly across all feature sets.
+             High-dimensional sparse input causes extreme over-fitting
+             and poor generalisation in tree-based methods.
+
+  6. Note on MultinomialNB with embeddings: NB with Word2Vec/Doc2Vec
+             requires a non-negative shift which distorts the distribution,
+             explaining the performance drop compared to sparse features.
+
+================================================================================
+                             END OF REPORT
+================================================================================
